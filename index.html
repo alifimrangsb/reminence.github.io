@@ -1,1 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Flip Card + Touchpad Slider</title>
+  <style>
+    body {
+      background-color: #000;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      padding: 50px;
+      overflow-x: hidden;
+    }
 
+    h2 {
+      margin-bottom: 38px;
+      color: #ffd700;
+    }
+
+    .card-container {
+      perspective: 1000px;
+      display: inline-block;
+      margin-bottom: 57px;
+    }
+
+    .card {
+      width: 262px;
+      height: 366px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.05s linear;
+      cursor: grab;
+      border-radius: 14px;
+      box-shadow:
+        0 0 20px rgba(255,215,0,0.8),
+        0 0 40px rgba(255,215,0,0.6);
+    }
+
+    .card-side {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 14px;
+      overflow: hidden;
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* Shine effect */
+    .card-side::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -150%;
+      width: 150%;
+      height: 100%;
+      background: linear-gradient(
+        120deg,
+        rgba(255,255,255,0) 0%,
+        rgba(255,255,255,0.3) 50%,
+        rgba(255,255,255,0) 100%
+      );
+      transform: skewX(-20deg);
+      animation: shine 2s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes shine {
+      0%   { left: -150%; }
+      100% { left: 150%;  }
+    }
+
+    .front {
+      background-image: url('https://i.postimg.cc/Wp6qktSb/Erza-Scarlet-SEC.png');
+    }
+
+    .back {
+      background-image: url('https://i.postimg.cc/76TsVdmD/WS-Card-Back.png');
+      transform: rotateY(180deg);
+    }
+
+    .slider-pad {
+      width: 262px;
+      height: 16px;
+      background-color: #ffd700;
+      border-radius: 8px;
+      margin: 0 auto;
+      cursor: ew-resize;
+      user-select: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slider-pad span {
+      color: #000;
+      font-size: 18px;
+      pointer-events: none;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>FT/S120-001EX SEC+</h2>
+
+  <div class="card-container">
+    <div class="card" id="card">
+      <div class="card-side front"></div>
+      <div class="card-side back"></div>
+    </div>
+  </div>
+
+  <div class="slider-pad" id="sliderPad">
+    <span>&lt; - - - - - - - - - - - - - - - - - - - - - - - - &gt;</span>
+  </div>
+
+  <script>
+    const card      = document.getElementById('card');
+    const sliderPad = document.getElementById('sliderPad');
+
+    let isDraggingCard  = false;
+    let isSlidingPad    = false;
+    let startX          = 0;
+    let currentRotation = 0;
+
+    function startCardDrag(e) {
+      isDraggingCard = true;
+      startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+      card.style.cursor = 'grabbing';
+    }
+
+    function endCardDrag() {
+      isDraggingCard = false;
+      card.style.cursor = 'grab';
+    }
+
+    function doCardDrag(e) {
+      if (!isDraggingCard) return;
+      const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+      currentRotation += (clientX - startX) * 0.5;
+      startX = clientX;
+      updateCard();
+    }
+
+    function startPadDrag(e) {
+      isSlidingPad = true;
+      startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+    }
+
+    function endPadDrag() {
+      isSlidingPad = false;
+    }
+
+    function doPadDrag(e) {
+      if (!isSlidingPad) return;
+      const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+      currentRotation += (clientX - startX) * 0.5;
+      startX = clientX;
+      updateCard();
+    }
+
+    function updateCard() {
+      card.style.transform = `rotateY(${currentRotation}deg)`;
+    }
+
+    card.addEventListener('mousedown', startCardDrag);
+    card.addEventListener('touchstart', startCardDrag);
+    document.addEventListener('mouseup', endCardDrag);
+    document.addEventListener('touchend', endCardDrag);
+    document.addEventListener('mousemove', doCardDrag);
+    document.addEventListener('touchmove', doCardDrag);
+
+    sliderPad.addEventListener('mousedown', startPadDrag);
+    sliderPad.addEventListener('touchstart', startPadDrag);
+    document.addEventListener('mouseup', endPadDrag);
+    document.addEventListener('touchend', endPadDrag);
+    document.addEventListener('mousemove', doPadDrag);
+    document.addEventListener('touchmove', doPadDrag);
+  </script>
+</body>
+</html>
